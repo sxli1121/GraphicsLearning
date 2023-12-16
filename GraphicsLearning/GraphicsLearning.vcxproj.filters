@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{0611e3a8-a440-4b55-a5c0-10b04402c009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Help">
+      <UniqueIdentifier>{b381a252-c8ab-4c5b-b498-00e2ef5d789c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render">
+      <UniqueIdentifier>{4d0dabee-eba1-4b5a-9ddc-0640e7c0d961}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering3D">
+      <UniqueIdentifier>{1620f833-0e3e-4979-93a3-2193346818da}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputMgr.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MemRenderBuffer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Rendering3D</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshData.cpp">
+      <Filter>Rendering3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>Rendering3D</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRender.cpp">
+      <Filter>Rendering3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Rendering3D</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderList.cpp">
+      <Filter>Rendering3D</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SingletonTemplate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Matrix3x3.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Matrix4x4.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Quaternion.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Universal.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Vector2.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Vector3.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Vector4.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="EnCoding.h">
+      <Filter>Help</Filter>
+    </ClInclude>
+    <ClInclude Include="InputMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemRenderBuffer.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilityHelper.h">
+      <Filter>Help</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometric.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Rendering3D</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshData.h">
+      <Filter>Rendering3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Rendering3D</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Rendering3D</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshRender.h">
+      <Filter>Rendering3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Rendering3D</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderList.h">
+      <Filter>Rendering3D</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
