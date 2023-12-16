@@ -24,6 +24,9 @@ public:
 	//模型绘制
 	void DrawMesh();
 protected:
+	// 在世界空间中进行近截面的裁剪
+	void _CullTriangleInWorldByNearPlane(Triangle& t, const Plane3D& planeNear);
+
 private:
 	LPMESHDATA mPMeshData;//指向所拥有的原始模型数据的指针
 	vec3f* mPVertexts;//存储世界变换以后的顶点数组 = 原始模型数据 * 世界变换矩阵

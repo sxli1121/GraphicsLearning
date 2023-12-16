@@ -3,6 +3,8 @@
 #define __GEOMETRIC_H__
 #include <windows.h>
 #include "UtilityHelper.h"
+#include "math3d/Matrix4x4.h"
+using namespace Math;
 
 class Rect :public RECT
 {
@@ -86,6 +88,17 @@ public:
 		vec3f normal = (p3 - p2).Cross(p1 - p2);
 		return normal.Dot(dir) < 0;  // 传进来的向量与平面的法向量点乘 <0 的时候才是看到的正面
 	}
+
+
+	// 三角形的矩阵变换
+	Triangle& Transform(const Mat4x4f& mat)
+	{
+		p1 = p1 * mat;
+		p2 = p2 * mat;
+		p3 = p3 * mat;
+		return *this;
+	}
+
 };
 
 
@@ -151,7 +164,7 @@ public:
 	// 线段与平面求交点
 	bool LineCrossPlane(const vec3f& p1, const vec3f& p2,  // 线段起终点
 		vec3f& pCross,
-		float* t = nullptr)
+		float* t = nullptr) const
 	{
 		vec3f linedelt = p2 - p1;
 		// 计算线段两端距离线段与平面的交点 的 距离插值
@@ -163,13 +176,17 @@ public:
 			return false;  // 距离差等于0 代表直线平行与平面
 		}
 
-
-
-
+		// 如果p1p2在平面的两边 p2 - p1 就是距离平面数值上的距离(一个正一个负)
+		float d1 = a * p1.x + b * p1.y + c * p1.z + d;
+		float k = -d1 / disdiffset; // 因为disdiffset 是由p2-p1得到 所以此处使用-d1
+		// 此时如果k 在0-1 之间代表点在两端 如果<0 表示在背面 >0 表示在正面
+		pCross = p1 + linedelt * k;
+		if (t != nullptr)
+		{
+			*t = k;
+		}
+		return true;
 	}
-
-
-
 
 protected:
 private:

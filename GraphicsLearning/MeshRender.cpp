@@ -86,13 +86,17 @@ void MeshRender::DrawMesh()
 				dir = t.p1 - campos;  // 摄像机看向三角形的任意一点的向量 与 
 				if (t.CheckFront(dir))  
 				{
-					// 通过背面拣选之后在计算矩阵--进行绘制
-					t.p1 = t.p1 * vpv;
-					t.p2 = t.p2 * vpv;
-					t.p3 = t.p3 * vpv;
+					//// 通过背面拣选之后在计算矩阵--进行绘制
+					//t.p1 = t.p1 * vpv;
+					//t.p2 = t.p2 * vpv;
+					//t.p3 = t.p3 * vpv;
 
-					//移动下标到下一个三角形
-					RL.AddTriangle();
+					////移动下标到下一个三角形
+					//RL.AddTriangle();
+
+
+					// 进入这里之后代表经过了背面拣选与视景体裁剪  接下来进行近截面裁剪--近截面裁剪的时候已经将符合条件的三角形加入绘制列表
+					_CullTriangleInWorldByNearPlane(t, frustum.plane_near);   // 此处没有进行VPV矩阵的变换  在renderList中进行
 				}
 			}
 			break;
@@ -100,5 +104,103 @@ void MeshRender::DrawMesh()
 	}
 }
 
+void MeshRender::_CullTriangleInWorldByNearPlane(Triangle& t, const Plane3D& planeNear)
+{
+	int insideCount = 0; // 在视景体中的三角形点的个数
+
+	float dis[3] = {
+		planeNear.Distance(t.p1),
+		planeNear.Distance(t.p2),
+		planeNear.Distance(t.p3),
+	};
+
+	vec3f c1, c2; // 近截面与三角形相交的两个点
+
+	/*
+	分情况讨论
+	因为我们规定视景体的所有截面正面朝外，所以如果
+	距离为正表示点在截面的外面
+	距离为负则表示点在截面的里面
+	*/
+
+	insideCount = (dis[0] < 0 ? 1 : 0) + (dis[1] < 0 ? 1 : 0) + (dis[2] < 0 ? 1 : 0);
+
+	switch (insideCount)
+	{
+	case 0: {return; }break;
+	case 3: {RL.AddTriangle(); return; }break;
+	case 1:
+	{
+		RL.AddTriangle();
+		if (dis[0] < 0) // 0点在近截面内部
+		{
+			planeNear.LineCrossPlane(t.pts[0], t.pts[1], c1);
+			planeNear.LineCrossPlane(t.pts[0], t.pts[2], c2);
+			t.pts[1] = c1;
+			t.pts[2] = c2;
+		}
+		else if (dis[1] < 0)
+		{
+			planeNear.LineCrossPlane(t.pts[1], t.pts[2], c1);
+			planeNear.LineCrossPlane(t.pts[1], t.pts[0], c2);
+			t.pts[2] = c1;
+			t.pts[0] = c2;
+		}
+		else if (dis[2] < 0)
+		{
+			planeNear.LineCrossPlane(t.pts[2], t.pts[0], c1);
+			planeNear.LineCrossPlane(t.pts[2], t.pts[1], c2);
+			t.pts[0] = c1;
+			t.pts[1] = c2;
+		}
+	}break;
+	case 2:
+	{
+		RL.AddTriangle();
+		if (dis[0] > 0) // 0点在外面 12点内部
+		{
+			planeNear.LineCrossPlane(t.pts[0], t.pts[2], c1);
+			planeNear.LineCrossPlane(t.pts[0], t.pts[1], c2);
+			t.pts[0] = c1;
+
+			// 新增的三角形
+			Triangle& tNew = RL.GetNextTriangle();
+			tNew.p1 = t.pts[1];
+			tNew.p2 = c1;
+			tNew.p3 = c2;
+			RL.AddTriangle();
+		}
+		else if (dis[1] > 0)
+		{
+			planeNear.LineCrossPlane(t.pts[1], t.pts[0], c1);
+			planeNear.LineCrossPlane(t.pts[1], t.pts[2], c2);
+			t.pts[1] = c1;
+
+			// 新增的三角形
+			Triangle& tNew = RL.GetNextTriangle();
+			tNew.p1 = t.pts[2];
+			tNew.p2 = c1;
+			tNew.p3 = c2;
+			RL.AddTriangle();
+		}
+		else if (dis[2] > 0)
+		{
+			planeNear.LineCrossPlane(t.pts[2], t.pts[1], c1);
+			planeNear.LineCrossPlane(t.pts[2], t.pts[0], c2);
+			t.pts[2] = c1;
+
+			// 新增的三角形
+			Triangle& tNew = RL.GetNextTriangle();
+			tNew.p1 = t.pts[0];
+			tNew.p2 = c1;
+			tNew.p3 = c2;
+			RL.AddTriangle();
+		}
+	}break;
+	}
+	return;
+}
+
 // 视景体裁剪(世界中)
 // 背面拣选(世界中)
+// 近截面裁剪(世界中)

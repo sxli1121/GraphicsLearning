@@ -33,8 +33,13 @@ void RenderList::ClearTriangle()
 
 void RenderList::RenderAllTriangle()
 {
+	Mat4x4f vpv;
+	Camera::mainCamera->GetVPV(vpv);
+
 	for (int i = 0;i<mCurIndex;++i)
 	{
+		mRenderTriangle[i].Transform(vpv);
+
 		MRB.DrawTriangle_Empty(
 			mRenderTriangle[i].p1.x, mRenderTriangle[i].p1.y,
 			mRenderTriangle[i].p2.x, mRenderTriangle[i].p2.y,
