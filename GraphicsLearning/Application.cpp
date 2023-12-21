@@ -171,6 +171,9 @@ bool Application::Run(const char* title,
 
 				////用指定颜色清除背景
 				MRB.FillColor(RGB(0, 0, 0));
+				//清除深度缓冲区
+				MRB.ClearZ();
+
 
 				MainScene.Render(deltatimef);
 

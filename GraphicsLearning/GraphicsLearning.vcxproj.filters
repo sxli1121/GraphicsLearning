@@ -60,6 +60,9 @@
     <ClCompile Include="RenderList.cpp">
       <Filter>Rendering3D</Filter>
     </ClCompile>
+    <ClCompile Include="MyTexture2D.cpp">
+      <Filter>Help</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="RenderList.h">
       <Filter>Rendering3D</Filter>
+    </ClInclude>
+    <ClInclude Include="MyTexture2D.h">
+      <Filter>Help</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

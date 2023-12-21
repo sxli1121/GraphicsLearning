@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{0aaa24eb-6387-4359-a99e-5e1f111ac34e}</ProjectGuid>
-    <RootNamespace>图形学</RootNamespace>
+    <ProjectGuid>{4c42ca33-0b01-40f8-ac2f-4765b51fd3d7}</ProjectGuid>
+    <RootNamespace>CreateGeometric</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -127,43 +127,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Component.cpp" />
-    <ClCompile Include="InputMgr.cpp" />
-    <ClCompile Include="MemRenderBuffer.cpp" />
-    <ClCompile Include="MeshData.cpp" />
-    <ClCompile Include="MeshRender.cpp" />
-    <ClCompile Include="MyTexture2D.cpp" />
-    <ClCompile Include="RenderList.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="Transform.cpp" />
+    <ClInclude Include="CommonDefine.h" />
+    <ClInclude Include="Geometric.h" />
+    <ClInclude Include="Matrix3x3.h" />
+    <ClInclude Include="Matrix4x4.h" />
+    <ClInclude Include="MeshData.h" />
+    <ClInclude Include="SingletonTemplate.h" />
+    <ClInclude Include="vector2d.h" />
+    <ClInclude Include="vector3d.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Component.h" />
-    <ClInclude Include="EnCoding.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="Geometric.h" />
-    <ClInclude Include="InputMgr.h" />
-    <ClInclude Include="math3d\Matrix3x3.h" />
-    <ClInclude Include="math3d\Matrix4x4.h" />
-    <ClInclude Include="math3d\Quaternion.h" />
-    <ClInclude Include="math3d\Universal.h" />
-    <ClInclude Include="math3d\Vector2.h" />
-    <ClInclude Include="math3d\Vector3.h" />
-    <ClInclude Include="math3d\Vector4.h" />
-    <ClInclude Include="MemRenderBuffer.h" />
-    <ClInclude Include="MeshData.h" />
-    <ClInclude Include="MeshRender.h" />
-    <ClInclude Include="MyTexture2D.h" />
-    <ClInclude Include="RenderList.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SingletonTemplate.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="UtilityHelper.h" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

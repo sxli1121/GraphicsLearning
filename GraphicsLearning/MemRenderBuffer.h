@@ -28,6 +28,7 @@ public:
 	unsigned char* BufferData() { return (unsigned char*)mBuffer; }
 
 	//实现一些绘制相关的函数
+	void ClearZ();   //清空深度值
 	void FillColor(const COLOR32& color);
 	void DrawPixel(int x, int y, const COLOR32& color);
 
@@ -84,15 +85,23 @@ public:
 	void DrawTriangle_Empty(int x1, int y1, int x2, int y2, int x3, int y3, const COLOR32& color);
 	void DrawTriangle_Empty(int x1, int y1, int x2, int y2, int x3, int y3,
 		const COLOR32& color1, const COLOR32& color2, const COLOR32& color3);
-
 	void DrawTriangle_Solid(int x1, int y1, int x2, int y2, int x3, int y3, const COLOR32& color);
 	//作业实现颜色渐变的实心三角形绘制
 	void DrawTriangle_Solid(int x1, int y1, int x2, int y2, int x3, int y3,
 		 COLOR32 color1,  COLOR32 color2,  COLOR32  color3);
-
 	//用重心权重的方式绘制颜色渐变的实心三角形
 	void DrawTriangle_Solid_W(int x1, int y1, int x2, int y2, int x3, int y3,
 		COLOR32 color1, COLOR32 color2, COLOR32 color3);
+
+	//带深度和纹理贴图的绘制
+	void DrawTriangle_Solid(
+		int x1, int y1, float z1,
+		int x2, int y2, float z2,
+		int x3, int y3, float z3,
+		vec2f uv1, vec2f uv2, vec2f uv3,
+		class MyTexture2D* ptex);
+
+
 
 
 	//色盘的绘制
@@ -104,21 +113,34 @@ protected:
 	void _DrawTriangle_Solid_Buttom(int x1, int y1, int x2, int y2, int x3, int y3, const COLOR32& color);
 	//绘制平顶三角形
 	void _DrawTriangle_Solid_Top(int x1, int y1, int x2, int y2, int x3, int y3, const COLOR32& color);
-
 	//绘制平底三角形
 	void _DrawTriangle_Solid_Buttom(int x1, int y1, int x2, int y2, int x3, int y3,
 		const COLOR32& color1, const COLOR32& color2, const COLOR32& color3);
 	//绘制平顶三角形
 	void _DrawTriangle_Solid_Top(int x1, int y1, int x2, int y2, int x3, int y3,
 		const COLOR32& color1, const COLOR32& color2, const COLOR32& color3);
-
-
 	//绘制平底三角形
 	void _DrawTriangle_Solid_Buttom_W(int x1, int y1, int x2, int y2, int x3, int y3,
 		const COLOR32& color1, const COLOR32& color2, const COLOR32& color3);
 	//绘制平顶三角形
 	void _DrawTriangle_Solid_Top_W(int x1, int y1, int x2, int y2, int x3, int y3,
 		const COLOR32& color1, const COLOR32& color2, const COLOR32& color3);
+
+
+	//绘制实心颜色渐变平顶平底三角形带深度值
+	void _DrawTriangle_Solid_Top(
+		int x1, int y1, float z1,
+		int x2, int y2, float z2,
+		int x3, int y3, float z3,
+		vec2f uv1, vec2f uv2, vec2f uv3, class MyTexture2D* ptex);
+	void _DrawTriangle_Solid_Bottom(
+		int x1, int y1, float z1,
+		int x2, int y2, float z2,
+		int x3, int y3, float z3,
+		vec2f uv1, vec2f uv2, vec2f uv3, class MyTexture2D* ptex);
+
+
+
 
 	//八分画圆
 	void _DrawCirclePoint8(int x, int y, int p, int q, const COLOR32& color);
@@ -193,6 +215,23 @@ private:
 	//颜色数据
 	LPCOLOR32 mBuffer;//使用一维数组存储所有的像素的颜色数据
 	LPPCOLOR32 mBufferArray;//存储每一行颜色的首地址，可以使用该变量用二维的方式访问颜色数据
+
+
+	/*
+	深度缓冲区的大小应该是和视口最后覆盖的区域的像素大小一致
+	此处我们的视口大小和窗口的客户区大小是一致，所以我们的深
+	缓冲区的大小就是整个绘制区域的大小，也就是颜色缓冲区的行
+	列数(一个深度值决定一个像素颜色值)
+	
+	因为我们在投影以后比较的是摄像机坐标下的z的倒数
+	(投影后的z坐标关于1/z成线性关系)
+	z的范围是：zNear ~ zFar
+	depth的范围：1/zFar ~ 1/zNear
+	可以肯定的是：0 < 1/zFar < 1/zNear;
+	为了方便使用，我们将深度值一开始的时候用0清空
+	*/
+
+	float* mZBuffer;
 };
 #define MRB MemRenderBuffer::Instance()
 #endif

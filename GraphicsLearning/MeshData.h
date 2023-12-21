@@ -4,6 +4,7 @@
 #include "SingletonTemplate.h"
 #include <map>
 #include "math3d/Vector3.h"
+#include "math3d/Vector2.h"
 using namespace Math;
 //模型数据类
 typedef class MeshData
@@ -16,8 +17,10 @@ public:
 
 	//从文件加载3d模型
 	bool LoadFromFile(const char* meshfile);
+	
 protected:
 	void _Clear();
+	void _CalcBoundingBox();
 	void _Copy(const MeshData& that);
 public:
 	int mVertextCount;//顶点的数量
@@ -26,6 +29,10 @@ public:
 	int mTriangleCount;//三角形的个数
 	vec3f* mPVertexts;//指向的顶点数据
 	int* mPIndex;//指向索引数据
+
+	vec2f* mPUVs; // 
+	class MyTexture2D* mPTexture;  // 这个模型使用的纹理
+
 
 	// 本地坐标系下面的包围盒
 	vec3f mBoundingBox[8];

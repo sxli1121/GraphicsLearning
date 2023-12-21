@@ -4,6 +4,7 @@
 #include <windows.h>
 #include "UtilityHelper.h"
 #include "math3d/Matrix4x4.h"
+#include "math3d/Vector2.h"
 using namespace Math;
 
 class Rect :public RECT
@@ -77,6 +78,17 @@ public:
 		};
 		vec3f pts[3];
 	};
+
+	union   // 三角形的三个顶点的uv坐标
+	{
+		struct
+		{
+			vec2f uv1, uv2, uv3;
+		};
+		vec2f uv[3];
+	};
+	class MyTexture2D* ptexture; // 三角形贴图
+
 	Triangle() :p1(vec3f::zero()), p2(vec3f::zero()), p3(vec3f::zero()) {}
 	Triangle(const vec3f& _p1, const vec3f& _p2, const vec3f& _p3)
 		:p1(_p1), p2(_p2), p3(_p3) {}
@@ -232,6 +244,12 @@ public:
 			plane_right.Distance(p) < 0 &&
 			plane_up.Distance(p) < 0 &&
 			plane_down.Distance(p) < 0;
+	}
+
+	//判断三角形是否在视景体内部
+	bool TriangleInFrustum(const Triangle& t) const
+	{
+		return PtInFrustum(t.p1) || PtInFrustum(t.p2) || PtInFrustum(t.p3);
 	}
 protected:
 private:

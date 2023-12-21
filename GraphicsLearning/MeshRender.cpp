@@ -81,23 +81,30 @@ void MeshRender::DrawMesh()
 				t.p2 = mPVertexts[pindex[i * 3 + 1]];
 				t.p3 = mPVertexts[pindex[i * 3 + 2]];
 
-				// 背面拣选
-				// 从摄像机看向三角形的方向向量
-				dir = t.p1 - campos;  // 摄像机看向三角形的任意一点的向量 与 
-				if (t.CheckFront(dir))  
+				if (frustum.TriangleInFrustum(t))
 				{
-					//// 通过背面拣选之后在计算矩阵--进行绘制
-					//t.p1 = t.p1 * vpv;
-					//t.p2 = t.p2 * vpv;
-					//t.p3 = t.p3 * vpv;
+					// 背面拣选
+					// 从摄像机看向三角形的方向向量
+					dir = t.p1 - campos;  // 摄像机看向三角形的任意一点的向量 与 
+					if (t.CheckFront(dir))
+					{
+						//// 通过背面拣选之后在计算矩阵--进行绘制
+						//t.p1 = t.p1 * vpv;
+						//t.p2 = t.p2 * vpv;
+						//t.p3 = t.p3 * vpv;
 
-					////移动下标到下一个三角形
-					//RL.AddTriangle();
+						////移动下标到下一个三角形
+						RL.AddTriangle();
 
 
-					// 进入这里之后代表经过了背面拣选与视景体裁剪  接下来进行近截面裁剪--近截面裁剪的时候已经将符合条件的三角形加入绘制列表
-					_CullTriangleInWorldByNearPlane(t, frustum.plane_near);   // 此处没有进行VPV矩阵的变换  在renderList中进行
+						// 进入这里之后代表经过了背面拣选与视景体裁剪  接下来进行近截面裁剪--近截面裁剪的时候已经将符合条件的三角形加入绘制列表
+						// _CullTriangleInWorldByNearPlane(t, frustum.plane_near);   // 此处没有进行VPV矩阵的变换  在renderList中进行 
+						//  // 在摄像机坐标下进行近截面的裁剪  在RenderList中  RenderAllTriangle中
+					}
 				}
+
+
+				
 			}
 			break;
 		}

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "MyTexture2D.h"
+#include "math3d/Matrix4x4.h"
 
 
 MeshData::MeshData()
@@ -14,6 +16,9 @@ MeshData::MeshData()
 	mTriangleCount = 0;
 	mPVertexts = nullptr;
 	mPIndex = nullptr;
+	mPUVs = nullptr;
+	mPTexture = nullptr;
+
 }
 
 MeshData::~MeshData()
@@ -56,6 +61,7 @@ bool MeshData::LoadFromFile(const char* meshfile)
 
 	std::vector<vec3f> tempvertext;//临时顶点数据数组
 	std::vector<int> tempindex;//临时索引数据数组
+	std::vector<vec2f> tempuv;
 
 	//逐行解析模型数据
 	std::string linestr;//一行的文本数据
@@ -72,10 +78,20 @@ bool MeshData::LoadFromFile(const char* meshfile)
 		{
 			linestrdata.push_back(temptext);
 		}
+		if (linestrdata[0] == "t")
+		{
+			if (linestrdata.size() != 2)
+			{
+				return false;//数据非法
+			}
+			std::string respath = ".\\res\\texture\\"; // 资源路径
+			std::string textpath = respath + linestrdata[1];  // 获取图片的路径
+			mPTexture = TextureManager::Instance().LoadTexture(textpath.c_str());  // 加载到图片管理类中
+		}
 		if (linestrdata[0] == "v")
 		{
 			//表示为顶点数据
-			if (linestrdata.size() != 4)
+			if (linestrdata.size() < 4)
 			{
 				//数据非法，直接返回加载错误
 				return false;
@@ -86,6 +102,15 @@ bool MeshData::LoadFromFile(const char* meshfile)
 			vec3f temp;
 			ts >> temp.x >> temp.y >> temp.z;//读取了3个float
 			tempvertext.push_back(temp);//存储一个顶点数据到临时数组
+
+			//兼容读取包括UV坐标的信息
+			if (linestrdata.size() >= 6)
+			{
+				vec2f uv;
+				ts >> uv.u >> uv.v;
+				tempuv.push_back(uv);
+			}
+
 		}
 		else if (linestrdata[0] == "f")
 		{
@@ -127,10 +152,11 @@ bool MeshData::LoadFromFile(const char* meshfile)
 
 	mPVertexts = new vec3f[mVertextCount];
 	mPIndex = new int[mIndexCount];
+	mPUVs = new vec2f[mVertextCount];
 
 	memcpy(mPVertexts, &tempvertext[0], mVertextCount * sizeof(vec3f));
 	memcpy(mPIndex, &tempindex[0], mIndexCount * sizeof(int));
-
+	memcpy(mPUVs, &tempuv[0], mVertextCount * sizeof(vec2f));
 
 	// 计算模型空间中的包围盒
 	vec3f maxpoint = mPVertexts[0]; 
@@ -158,15 +184,46 @@ bool MeshData::LoadFromFile(const char* meshfile)
 	mBoundingBox[7] = vec3f(minpoint.x, minpoint.y, minpoint.z);
 
 	return true;
+}
 
 
+void MeshData::_CalcBoundingBox()
+{
+	//计算模型空间的包围盒数
+	vec3f maxpoint = mPVertexts[0];
+	vec3f minpoint = mPVertexts[0];
 
+	for (int i = 1; i < mVertextCount; ++i)
+	{
+		if (mPVertexts[i].x > maxpoint.x) { maxpoint.x = mPVertexts[i].x; }
+		if (mPVertexts[i].y > maxpoint.y) { maxpoint.y = mPVertexts[i].y; }
+		if (mPVertexts[i].z > maxpoint.z) { maxpoint.z = mPVertexts[i].z; }
+
+		if (mPVertexts[i].x < minpoint.x) { minpoint.x = mPVertexts[i].x; }
+		if (mPVertexts[i].y < minpoint.y) { minpoint.y = mPVertexts[i].y; }
+		if (mPVertexts[i].z < minpoint.z) { minpoint.z = mPVertexts[i].z; }
+	}
+
+	mBoundingBox[0] = vec3f(maxpoint.x, maxpoint.y, maxpoint.z);
+	mBoundingBox[1] = vec3f(maxpoint.x, maxpoint.y, minpoint.z);
+	mBoundingBox[2] = vec3f(minpoint.x, maxpoint.y, minpoint.z);
+	mBoundingBox[3] = vec3f(minpoint.x, maxpoint.y, maxpoint.z);
+	mBoundingBox[4] = vec3f(maxpoint.x, minpoint.y, maxpoint.z);
+	mBoundingBox[5] = vec3f(maxpoint.x, minpoint.y, minpoint.z);
+	mBoundingBox[6] = vec3f(minpoint.x, minpoint.y, maxpoint.z);
+	mBoundingBox[7] = vec3f(minpoint.x, minpoint.y, minpoint.z);
 }
 
 void MeshData::_Clear()
 {
 	SAFE_DELETE_ARRAY_PTR(mPVertexts);
 	SAFE_DELETE_ARRAY_PTR(mPIndex);
+	SAFE_DELETE_ARRAY_PTR(mPUVs);
+
+	mVertextCount = 0;
+	mIndexCount = 0;
+	mTriangleCount = 0;
+	mPTexture = nullptr;
 }
 
 void MeshData::_Copy(const MeshData& that)
@@ -174,6 +231,8 @@ void MeshData::_Copy(const MeshData& that)
 	memcpy(this, &that, sizeof(MeshData));
 	mPVertexts = nullptr;
 	mPIndex = nullptr;
+	mPUVs = nullptr;
+	mPTexture = that.mPTexture;
 	if (that.mPVertexts != nullptr)
 	{
 		mPVertexts = new vec3f[mVertextCount];
@@ -186,5 +245,12 @@ void MeshData::_Copy(const MeshData& that)
 		memcpy(mPIndex, that.mPIndex, sizeof(int) * mIndexCount);
 	}
 
+	if (that.mPUVs != nullptr)
+	{
+		mPUVs = new vec2f[mVertextCount];
+		memcpy(mPUVs, that.mPUVs, sizeof(vec2f) * mVertextCount);
+	}
+
 	memcpy(mBoundingBox, that.mBoundingBox, sizeof(vec3f) * 8);
+
 }

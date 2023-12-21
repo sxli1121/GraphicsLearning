@@ -14,6 +14,9 @@ using namespace Math;
 //一次性可以绘制的三角形数量最大值
 #define MAX_TRANGLE_NUM (1000000)
 
+//将UV包装隐射到0-1范围
+#define  UVREPEAT(t) ((t)-floor(t))
+
 namespace Utility
 {
 	//定义的32位的颜色数据 

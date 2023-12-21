@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphicsLearning", "GraphicsLearning\GraphicsLearning.vcxproj", "{0AAA24EB-6387-4359-A99E-5E1F111AC34E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateGeometric", "CreateGeometric\CreateGeometric.vcxproj", "{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{0AAA24EB-6387-4359-A99E-5E1F111AC34E}.Release|x64.Build.0 = Release|x64
 		{0AAA24EB-6387-4359-A99E-5E1F111AC34E}.Release|x86.ActiveCfg = Release|Win32
 		{0AAA24EB-6387-4359-A99E-5E1F111AC34E}.Release|x86.Build.0 = Release|Win32
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Debug|x64.ActiveCfg = Debug|x64
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Debug|x64.Build.0 = Debug|x64
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Debug|x86.ActiveCfg = Debug|Win32
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Debug|x86.Build.0 = Debug|Win32
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Release|x64.ActiveCfg = Release|x64
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Release|x64.Build.0 = Release|x64
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Release|x86.ActiveCfg = Release|Win32
+		{4C42CA33-0B01-40F8-AC2F-4765B51FD3D7}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

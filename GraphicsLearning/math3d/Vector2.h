@@ -15,7 +15,17 @@ namespace Math
 		friend inline std::istream& operator>>(std::istream& i, Vector2<T>& v);
 
 	public:
-		T x, y;
+		union
+		{
+			struct
+			{
+				T x, y;
+			};
+			struct
+			{
+				T u, v;
+			};
+		};
 		//构造
 		Vector2() :x(0), y(0) {}
 		Vector2(T _x, T _y) :x(_x), y(_y) {}
@@ -391,6 +401,11 @@ namespace Math
 			char buff[100] = {};
 			sprintf_s(buff, 100, "(%f,%f)", x, y);
 			return buff;
+		}
+
+		static Vector2<T> Lerp(const Vector2<T>& from, const Vector2<T>& to, float t)
+		{
+			return from + (to - from) * t;
 		}
 	};
 
