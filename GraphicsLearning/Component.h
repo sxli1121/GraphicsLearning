@@ -10,6 +10,7 @@ typedef enum class emComponentType
 	ComType_MeshRender,//模型渲染组件
 	ComType_Camera,//摄像机组件
 	ComType_Light,//灯光组件
+	ComType_Terrain,//地形组件
 	//...
 }COMTYPE,*LPCOMTYPE;
 

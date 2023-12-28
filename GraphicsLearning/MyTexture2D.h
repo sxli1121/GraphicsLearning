@@ -21,6 +21,10 @@ public:
 
 	COLOR32 GetUVColor(const vec2f& uv);
 	COLOR32 GetUVColor(float u, float v);
+	int GetPixelGray(int x, int y);
+
+	const int& Width() const { return mWidth; }
+	const int& Height() const { return mHeight; }
 
 protected:
 	int mWidth;

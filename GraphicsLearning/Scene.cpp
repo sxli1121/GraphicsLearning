@@ -14,26 +14,21 @@ GameObject g_Cam;
 GameObject g_Plane;
 GameObject g_Plane2;
 
+GameObject g_touzi10p;
+GameObject g_touzi14p;
+
+GameObject g_Terrain;
+
 bool Scene::Init()
 {
-	g_Plane2.LoadMesh(".\\res\\mesh\\plane_uv.txt");
-	g_Plane2.transform().SetPosition(vec3f::zero());
-	g_Plane2.transform().SetRotation(vec3f::zero());
-	g_Plane2.transform().SetScale(vec3f::one());
-	g_Plane2.transform().rotate(vec3f::forward() * 45.f);
-
-	bool isok = g_Plane.LoadMesh(".\\res\\mesh\\plane_uv.txt");
-	if (!isok)
+	bool tok = g_Terrain.CreateTerrainByHeightMap(".\\res\\heightmap\\257x257.bmp", 0.5, 0, 20);
+	if (tok)
 	{
-		printf("读取失败\n");
-		return false;
+		printf("地形加载成功\n");
 	}
 	else
 	{
-		printf("读取成功\n");
-		g_Plane.transform().SetPosition(vec3f::zero());
-		g_Plane.transform().SetRotation(vec3f::zero());
-		g_Plane.transform().SetScale(vec3f::one());
+		printf("地形加载失败\n");
 	}
 
 	POINT s = App.WndSize();
@@ -43,7 +38,7 @@ bool Scene::Init()
 	if (pcam != nullptr)
 	{
 		pcam->SetCamera(
-			vec3f(0, 5, -10),
+			vec3f(0, 0, -10),
 			vec3f::zero(),
 			vec3f::up(),
 			w, h, 0.3f, 1000.0f,
@@ -56,37 +51,46 @@ bool Scene::Init()
 float t = 0;
 void Scene::Update(float dt)
 {
-	g_Plane.transform().rotate(vec3f::up() * dt * 20);
+
 	if (Input.KeyDown(VK_UP))
 	{
 		g_Cam.transform().translate(g_Cam.transform().forward() * dt * 10);
-		g_Cam.transform().lookat(vec3f::zero());
+		//g_Cam.transform().lookat(vec3f::zero());
 	}
 	else if (Input.KeyDown(VK_DOWN))
 	{
 		g_Cam.transform().translate(g_Cam.transform().back() * dt * 10);
-		g_Cam.transform().lookat(vec3f::zero());
+		//g_Cam.transform().lookat(vec3f::zero());
+	}
+	else if (Input.KeyDown(VK_LEFT))
+	{
+		g_Cam.transform().translate(g_Cam.transform().left() * dt * 10);
+		//g_Cam.transform().lookat(vector3d::Zero());
+	}
+	else if (Input.KeyDown(VK_RIGHT))
+	{
+		g_Cam.transform().translate(g_Cam.transform().right() * dt * 10);
+		//g_Cam.transform().lookat(vector3d::Zero());
 	}
 	else if (Input.KeyDown(VK_PRIOR))
 	{
 		g_Cam.transform().translate(vec3f::up() * dt * 10);
-		g_Cam.transform().lookat(vec3f::zero());
+		//g_Cam.transform().lookat(vec3f::zero());
 	}
 	else if (Input.KeyDown(VK_NEXT))
 	{
 		g_Cam.transform().translate(vec3f::down() * dt * 10);
-		g_Cam.transform().lookat(vec3f::zero());
+		//g_Cam.transform().lookat(vec3f::zero());
 	}
 
-	g_Plane.OnUpdate();
-	g_Plane2.OnUpdate();
+	g_Terrain.OnUpdate();
 	g_Cam.OnUpdate();
 }
 
 void Scene::Render(float dt)
 {
-	g_Plane2.OnRender();
-	g_Plane.OnRender();
+	g_Terrain.OnRender();
+
 }
 
 Scene::~Scene()

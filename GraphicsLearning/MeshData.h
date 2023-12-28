@@ -17,6 +17,12 @@ public:
 
 	//从文件加载3d模型
 	bool LoadFromFile(const char* meshfile);
+
+	//加载灰度图 --加载灰度模型
+	bool LoadGrayMap(const char* hm,
+		float unitsize,//单位大小，一个格子的像素宽高，两个点之间的间隔距离
+		float _floor,//最小高度
+		float _top);
 	
 protected:
 	void _Clear();

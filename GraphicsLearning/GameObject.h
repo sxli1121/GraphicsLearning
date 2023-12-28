@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Transform.h"
 #include "MeshRender.h"
+#include "Terrain.h"
 
 #include <vector>
 
@@ -68,6 +69,17 @@ public:
 			mComponents.push_back(pMR);
 			return pMR;
 		}break;
+		case COMTYPE::ComType_Terrain:
+		{
+			Terrain* pt = (Terrain*)GetComponent(COMTYPE::ComType_Terrain);
+			if (pt != nullptr)
+			{
+				return pt;
+			}
+			pt = new Terrain(this);
+			mComponents.push_back(pt);
+			return pt;
+		}break;
 		case COMTYPE::ComType_Light:
 		{
 
@@ -119,6 +131,12 @@ public:
 		{
 			return pMR->DrawMesh();
 		}
+
+		Terrain* pt = (Terrain*)GetComponent(COMTYPE::ComType_Terrain);
+		if (pt != nullptr)
+		{
+			return pt->DrawTerrain();
+		}
 	}
 	//逻辑更新
 	void OnUpdate()
@@ -133,6 +151,13 @@ public:
 				//重新计算世界中的顶点信息，并且加入绘制列表
 				return pMR->CalculateWorldVertexts();
 			}
+
+			Terrain* pt = (Terrain*)GetComponent(emComponentType::ComType_Terrain);
+			if (pt != nullptr)
+			{
+				return pt->UpdateTerrain();
+			}
+
 			//如果该物体是一个摄像机的话，因为transform改变了所以摄像机也要更新
 			Camera* pCam = (Camera*)GetComponent(emComponentType::ComType_Camera);
 			if (pCam != nullptr)
@@ -150,6 +175,27 @@ public:
 		{
 			LPMESHDATA pmesh = MeshManager::Instance().GetMesh(name); 
 			return pMR->SetMesh(pmesh);
+		}
+		return false;
+	}
+
+
+	bool CreateTerrainByHeightMap(const char* hm,
+		float unitsize, float _floor, float _top)
+	{
+		//如果当前gameobject要作为一个地形，那么不需要transform以外的组件
+		if (!mComponents.empty())
+		{
+			for (auto& c : mComponents)
+			{
+				delete c;
+			}
+			mComponents.clear();
+		}
+		Terrain* pt = (Terrain*)AddComponent(COMTYPE::ComType_Terrain);
+		if (pt != nullptr)
+		{
+			return pt->LoadHeightMap(hm, unitsize, _floor, _top);
 		}
 		return false;
 	}

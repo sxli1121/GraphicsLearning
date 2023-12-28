@@ -4,6 +4,10 @@
 
 #define  SAFE_DELETE_ARRAY_PTR(t) if(t!=nullptr){delete [] t;t=nullptr;}
 #define  CLIMP_2_ONE(t)	((t)<0?0:(t)>1?1:(t))
+
+//是否2的n次方
+#define IS_POWER_OF2(n) ((((n)-1)&(n))==0)
+
 #include <iostream>
 #include "./math3d/Vector3.h"
 

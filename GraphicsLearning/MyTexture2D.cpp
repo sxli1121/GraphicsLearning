@@ -66,6 +66,17 @@ COLOR32 MyTexture2D::GetUVColor(float u, float v)
 	return COLOR32(pColor24[2], pColor24[1], pColor24[0]);
 }
 
+int MyTexture2D::GetPixelGray(int x, int y)
+{
+	if (x >= 0 && x < mWidth && y >= 0 && y < mHeight)
+	{
+		unsigned char* pColor24 = mData + (y * mLineCount + x * 3);
+		return pColor24[1];
+	}
+	return 0;
+}
+
+
 TextureManager::~TextureManager()
 {
 	if (!mTexMap.empty())

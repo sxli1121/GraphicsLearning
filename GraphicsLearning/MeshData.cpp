@@ -186,6 +186,64 @@ bool MeshData::LoadFromFile(const char* meshfile)
 	return true;
 }
 
+bool MeshData::LoadGrayMap(const char* hm, float unitsize, float _floor, float _top)
+{
+
+	MyTexture2D graymap;
+	if (graymap.LoadTexture(hm))
+	{
+		_Clear();
+		const int& w = graymap.Width();
+		const int& h = graymap.Height();
+
+		//总共宽w个像素，高h个像素，那么点的总数为 w*h
+		//分成的格子数量为 (w-1)*(h-1)
+
+		mVertextCount = w * h;
+		mTriangleCount = (w - 1) * (h - 1) * 2;
+		mIndexCount = mTriangleCount * 3;
+
+		mPVertexts = new vec3f[mVertextCount];
+		mPIndex = new int[mIndexCount];
+		mPUVs = new vec2f[mVertextCount];
+
+		float cz, cx, cy;//顶点坐标
+		float fg;//灰度比例
+
+		// 根据灰度值 更新uv 三角形的顶点坐标
+		for (int z = 0; z < h; ++z)    // 此时的平面坐标是x和z
+		{
+			cz = unitsize * (h - 1 - z);   // 当前的h是在z方向上的值  当前的z的值 = 每一个格子的宽度 * （格子的数量 - z）  倒着的
+			for (int x = 0; x < w; ++x)
+			{
+				cx = unitsize * x;  
+				fg = graymap.GetPixelGray(x, z) / 255.0f;
+				cy = _floor + (_top - _floor) * fg;   // 修改高度的值--根据灰度值
+				mPVertexts[z * w + x] = vec3f(cx, cy, cz);
+				mPUVs[z * w + x] = vec2f(float(x) / (w - 1), float(z) / (h - 1));  // 将uv值限定在0-1之间
+			}
+		}
+
+		// 更新索引 -- 根据网格的数量
+		int* pindex = nullptr;
+		for (int i = 0; i < (h - 1); ++i)
+		{
+			for (int j = 0; j < (w - 1); ++j)
+			{
+				pindex = mPIndex + (i * (w - 1) + j) * 6;
+				pindex[0] = i * w + j;
+				pindex[1] = pindex[0] + 1;
+				pindex[2] = pindex[1] + w;
+				pindex[3] = i * w + j;
+				pindex[4] = pindex[1] + w;
+				pindex[5] = pindex[0] + w;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
 
 void MeshData::_CalcBoundingBox()
 {

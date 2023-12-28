@@ -63,6 +63,9 @@
     <ClCompile Include="MyTexture2D.cpp">
       <Filter>Help</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Rendering3D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -133,6 +136,9 @@
     </ClInclude>
     <ClInclude Include="MyTexture2D.h">
       <Filter>Help</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Rendering3D</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

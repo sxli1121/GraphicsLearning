@@ -2,8 +2,9 @@
 #include "EnCoding.h"
 #include "InputMgr.h"
 #include "Scene.h"
-#include "MemRenderBuffer.h"
 #include "RenderList.h"
+#include "MemRenderBuffer.h"
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -166,6 +167,8 @@ bool Application::Run(const char* title,
 				//调用逻辑和绘制相关的内容
 				MainScene.Update(deltatimef);
 
+				//清空地形三角形
+				TRL.ClearTriangle();
 				//每次绘制之前清掉三角形
 				RL.ClearTriangle();
 
@@ -177,8 +180,11 @@ bool Application::Run(const char* title,
 
 				MainScene.Render(deltatimef);
 
+				//绘制地形
+				TRL.RenderAllTriangle();
 				//最后批量绘制三角形
 				RL.RenderAllTriangle();
+
 
 
 				lasttime = curtime;
