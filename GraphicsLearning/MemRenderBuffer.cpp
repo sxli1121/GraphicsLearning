@@ -117,7 +117,7 @@ void MemRenderBuffer::DrawRectangleEmpty(int x1, int y1, int x2, int y2, const C
 		for (int i = 0; i < w; ++i)
 		{
 			memcpy(&mBufferArray[cross.top][cross.left + i], &color, sizeof(COLOR32));
-			memcpy(&mBufferArray[cross.bottom][cross.left + i], &color, sizeof(COLOR32));
+			memcpy(&mBufferArray[cross.bottom-1][cross.left + i], &color, sizeof(COLOR32));
 		}
 
 
@@ -386,22 +386,22 @@ void MemRenderBuffer::DrawLine_Bresenham_C1(int x1, int y1, int x2, int y2, cons
 
 void MemRenderBuffer::DrawLine_Bresenham(int x1, int y1, int x2, int y2, const COLOR32& color)
 {
-	if (!_ClipLine_mp(x1, y1, x2, y2)) // 裁剪
+	if (!_ClipLine_csl(x1, y1, x2, y2))
 	{
-		return; 
+		return;
 	}
 
 	int dx = abs(x2 - x1);
 	int dy = abs(y2 - y1);
 	bool bInterchange = false;   // 是否交换x y 的值
-	int e, temp, signx, signy;   // signx, signy 
+	int e=0, temp=0, signx=0, signy=0;   // signx, signy 
 
 	// 判断 x2与x1 的关系  x2大于x1为1 等于为0 小于为-1  
-	signx = (x2 > x1) ? 1 : (x2 < x1) ? -1 : 0;  // 如果x2 > x1  signx=1   x2 不> x1  判断 x2 < x1   如果x2 < x1 signx=-1  否则 signx =0；
-	signy = (y2 > y1) ? 1 : (y2 < y1) ? -1 : 0;
+	signx = (x2 > x1) ? 1 : (x2 < x1) ? -1 : 0;    // 如果x2 > x1  signx=1   x2 不> x1  判断 x2 < x1   如果x2 < x1 signx=-1  否则 signx =0；
+	signy = (y2 > y1) ? 1 : (y2 < y1) ? -1 : 0;    
 
-	if (dy > dx) // y的变化量大于x的变化量 交换x和y的变化量  按照y移动
- 	{
+	if (dy > dx)		// y的变化量大于x的变化量 交换x和y的变化量  按照y移动
+	{
 		temp = dx;
 		dx = dy;
 		dy = temp;
@@ -415,10 +415,10 @@ void MemRenderBuffer::DrawLine_Bresenham(int x1, int y1, int x2, int y2, const C
 
 	if (!bInterchange) // 原本是按照x的方向移动
 	{
-		for (int i = 0; i < dx; ++i)
+		for (int i = 0; i < dx-1; ++i)
 		{
 			mBufferArray[y][x] = color;
-			x += signx;  
+			x += signx;
 			e += _2dy;
 			if (e >= 0)
 			{

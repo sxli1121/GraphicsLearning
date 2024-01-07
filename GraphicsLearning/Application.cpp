@@ -1,4 +1,4 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include "EnCoding.h"
 #include "InputMgr.h"
 #include "Scene.h"
@@ -189,6 +189,8 @@ bool Application::Run(const char* title,
 
 				lasttime = curtime;
 			}
+			printf("\rFPS:%f  模型三角形数量：%d  地形三角形数量:%d      ",
+				1 / deltatimef, RL.GetTriangleCount(), TRL.GetTriangleCount());
 		}
 	} while (msg.message != WM_QUIT);
 	return true;

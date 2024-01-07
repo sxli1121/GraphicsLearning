@@ -2,6 +2,7 @@
 #ifndef __GAME_OBJECT_H__
 #define __GAME_OBJECT_H__
 #include "Camera.h"
+
 #include "Transform.h"
 #include "MeshRender.h"
 #include "Terrain.h"
@@ -141,30 +142,32 @@ public:
 	//逻辑更新
 	void OnUpdate()
 	{
-		bool& isNeedUpdate = mpTransform->NeedUpdate();
-		if (isNeedUpdate)
+		Terrain* pt = (Terrain*)GetComponent(emComponentType::ComType_Terrain);
+		if (pt != nullptr)
 		{
-			//如果有需要绘制的物体
-			MeshRender* pMR = (MeshRender*)GetComponent(emComponentType::ComType_MeshRender);
-			if (pMR != nullptr)
+			return pt->UpdateTerrain();
+		}
+		else
+		{
+			bool& isNeedUpdate = mpTransform->NeedUpdate();
+			if (isNeedUpdate)
 			{
-				//重新计算世界中的顶点信息，并且加入绘制列表
-				return pMR->CalculateWorldVertexts();
-			}
+				//如果有需要绘制的物体
+				MeshRender* pMR = (MeshRender*)GetComponent(emComponentType::ComType_MeshRender);
+				if (pMR != nullptr)
+				{
+					//重新计算世界中的顶点信息，并且加入绘制列表
+					return pMR->CalculateWorldVertexts();
+				}
 
-			Terrain* pt = (Terrain*)GetComponent(emComponentType::ComType_Terrain);
-			if (pt != nullptr)
-			{
-				return pt->UpdateTerrain();
+				//如果该物体是一个摄像机的话，因为transform改变了所以摄像机也要更新
+				Camera* pCam = (Camera*)GetComponent(emComponentType::ComType_Camera);
+				if (pCam != nullptr)
+				{
+					return pCam->UpdateCamera();
+				}
+				isNeedUpdate = false;
 			}
-
-			//如果该物体是一个摄像机的话，因为transform改变了所以摄像机也要更新
-			Camera* pCam = (Camera*)GetComponent(emComponentType::ComType_Camera);
-			if (pCam != nullptr)
-			{
-				return pCam->UpdateCamera();
-			}
-			isNeedUpdate = false;
 		}
 	}
 

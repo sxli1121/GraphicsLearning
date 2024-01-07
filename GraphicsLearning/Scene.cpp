@@ -21,7 +21,7 @@ GameObject g_Terrain;
 
 bool Scene::Init()
 {
-	bool tok = g_Terrain.CreateTerrainByHeightMap(".\\res\\heightmap\\257x257.bmp", 0.5, 0, 20);
+	bool tok = g_Terrain.CreateTerrainByHeightMap(".\\res\\heightmap\\513x513.bmp", 0.5, 0, 20);
 	if (tok)
 	{
 		printf("地形加载成功\n");
@@ -49,6 +49,8 @@ bool Scene::Init()
 }
 
 float t = 0;
+float gC1 = 1.0f;
+float gC2 = 1.0f;
 void Scene::Update(float dt)
 {
 
@@ -81,6 +83,48 @@ void Scene::Update(float dt)
 	{
 		g_Cam.transform().translate(vec3f::down() * dt * 10);
 		//g_Cam.transform().lookat(vec3f::zero());
+	}
+
+	if (Input.KeyDown(VK_ADD))//+
+	{
+		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
+		if (pt)
+		{
+			system("cls");
+			pt->SetC1(gC1 += 0.1f);
+			printf("c1:%f   \n", gC1);
+		}
+	}
+	else if (Input.KeyDown(VK_SUBTRACT))//-
+	{
+		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
+		if (pt)
+		{
+			system("cls");
+			pt->SetC1(gC1 -= 0.1f);
+			printf("c1:%f   \n", gC1);
+		}
+	}
+
+	if (Input.KeyDown(VK_DIVIDE))// /
+	{
+		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
+		if (pt)
+		{
+			system("cls");
+			pt->SetC2(gC2 += 0.1f);
+			printf("c2:%f   \n", gC2);
+		}
+	}
+	else if (Input.KeyDown(VK_MULTIPLY))// *
+	{
+		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
+		if (pt)
+		{
+			system("cls");
+			pt->SetC2(gC2 -= 0.1f);
+			printf("c2:%f   \n", gC2);
+		}
 	}
 
 	g_Terrain.OnUpdate();

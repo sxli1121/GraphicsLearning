@@ -6,6 +6,7 @@
 #include "math3d/Matrix4x4.h"
 #include "math3d/Vector2.h"
 using namespace Math;
+#include "UtilityHelper.h"
 
 class Rect :public RECT
 {
@@ -250,6 +251,16 @@ public:
 	bool TriangleInFrustum(const Triangle& t) const
 	{
 		return PtInFrustum(t.p1) || PtInFrustum(t.p2) || PtInFrustum(t.p3);
+	}
+
+	bool SphereInFrustum(const vec3f& center, float radius) const
+	{
+		return plane_near.Distance(center) < radius &&
+			plane_far.Distance(center) < radius &&
+			plane_left.Distance(center) < radius &&
+			plane_right.Distance(center) < radius &&
+			plane_up.Distance(center) < radius &&
+			plane_down.Distance(center) < radius;
 	}
 protected:
 private:
