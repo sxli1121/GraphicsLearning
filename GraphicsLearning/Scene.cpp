@@ -9,27 +9,59 @@
 #include "GameObject.h"
 #include "Application.h"
 
-GameObject g_TriPyramid;
 GameObject g_Cam;
-GameObject g_Plane;
-GameObject g_Plane2;
-
-GameObject g_touzi10p;
-GameObject g_touzi14p;
-
-GameObject g_Terrain;
+GameObject g_SkyBox;
+GameObject g_Box;
+GameObject g_RabbitVoxel;
 
 bool Scene::Init()
 {
-	bool tok = g_Terrain.CreateTerrainByHeightMap(".\\res\\heightmap\\513x513.bmp", 0.5, 0, 20);
-	if (tok)
+
+	//MeshData test;
+	//test.LoadFromObj(".\\res\\obj\\Rabbit\\Rabbit.obj");
+	//test.Save2File(".\\res\\mesh\\Rabbit.txt","Rabbit_D.bmp");
+
+
+	if (!g_SkyBox.LoadSkyBox("s1"))
 	{
-		printf("地形加载成功\n");
+		printf("加载天空盒失败\n");
+		system("pause");
 	}
-	else
-	{
-		printf("地形加载失败\n");
-	}
+
+	//if (g_Box.LoadMesh(".\\res\\mesh\\newbox.txt"))
+	//{
+	//	g_Box.transform().SetPosition(vec3f::zero());
+	//	g_Box.transform().SetRotation(vec3f::zero());
+	//	g_Box.transform().SetScale(vec3f::one());
+	//}
+	//else
+	//{
+	//	printf("加载模型失败\n");
+	//	system("pause");
+	//	return false;
+	//}
+
+	//if (g_RabbitVoxel.LoadMesh(".\\res\\mesh\\Rabbit.txt")/*LoadObj(".\\res\\obj\\monu1\\monu1.obj")*/)
+	//{
+	//	g_RabbitVoxel.transform().SetPosition(vec3f::zero());
+	//}
+	//else
+	//{
+	//	printf("加载模型失败\n");
+	//	system("pause");
+	//	return false;
+	//}
+
+	//if (g_RabbitVoxel.LoadObj(".\\res\\obj\\Rabbit\\Rabbit.obj"))
+	//{
+	//	g_RabbitVoxel.transform().SetPosition(vec3f::zero());
+	//}
+	//else
+	//{
+	//	printf("加载模型失败\n");
+	//	system("pause");
+	//	return false;
+	//}
 
 	POINT s = App.WndSize();
 	int w = s.x;
@@ -41,100 +73,82 @@ bool Scene::Init()
 			vec3f(0, 0, -10),
 			vec3f::zero(),
 			vec3f::up(),
-			w, h, 0.3f, 1000.0f,
+			w, h, 0.3, 1000.0f,
 			float(w) / h,
 			60.0f);
 	}
+
 	return true;
 }
 
-float t = 0;
-float gC1 = 1.0f;
-float gC2 = 1.0f;
+float anglex = 0, angley = 0;
 void Scene::Update(float dt)
 {
 
-	if (Input.KeyDown(VK_UP))
+	float speed = 10;
+	if (Input.KeyDown('W'))
 	{
-		g_Cam.transform().translate(g_Cam.transform().forward() * dt * 10);
-		//g_Cam.transform().lookat(vec3f::zero());
+		vec3f f = g_Cam.transform().forward();
+		g_Cam.transform().translate(vec3f(f.x, 0, f.z).normalized() * dt * speed);
 	}
-	else if (Input.KeyDown(VK_DOWN))
+	else if (Input.KeyDown('S'))
 	{
-		g_Cam.transform().translate(g_Cam.transform().back() * dt * 10);
-		//g_Cam.transform().lookat(vec3f::zero());
+		vec3f b = g_Cam.transform().back();
+		g_Cam.transform().translate(vec3f(b.x, 0, b.z).normalized() * dt * speed);
 	}
-	else if (Input.KeyDown(VK_LEFT))
+
+	if (Input.KeyDown('A'))
 	{
-		g_Cam.transform().translate(g_Cam.transform().left() * dt * 10);
-		//g_Cam.transform().lookat(vector3d::Zero());
+		vec3f f = g_Cam.transform().left();
+		g_Cam.transform().translate(vec3f(f.x, 0, f.z).normalized() * dt * speed);
+	}
+	else if (Input.KeyDown('D'))
+	{
+		vec3f b = g_Cam.transform().right();
+		g_Cam.transform().translate(vec3f(b.x, 0, b.z).normalized() * dt * speed);
+	}
+
+	if (Input.KeyDown(VK_LEFT))
+	{
+		angley -= dt * speed * 3;
+		g_Cam.transform().SetRotation(vec3f(0, 0, 0));
+		g_Cam.transform().rotate(vec3f(anglex, 0, 0));
+		g_Cam.transform().rotate(vec3f(0, angley, 0));
 	}
 	else if (Input.KeyDown(VK_RIGHT))
 	{
-		g_Cam.transform().translate(g_Cam.transform().right() * dt * 10);
-		//g_Cam.transform().lookat(vector3d::Zero());
-	}
-	else if (Input.KeyDown(VK_PRIOR))
-	{
-		g_Cam.transform().translate(vec3f::up() * dt * 10);
-		//g_Cam.transform().lookat(vec3f::zero());
-	}
-	else if (Input.KeyDown(VK_NEXT))
-	{
-		g_Cam.transform().translate(vec3f::down() * dt * 10);
-		//g_Cam.transform().lookat(vec3f::zero());
+		angley += dt * speed * 3;
+		g_Cam.transform().SetRotation(vec3f(0, 0, 0));
+		g_Cam.transform().rotate(vec3f(anglex, 0, 0));
+		g_Cam.transform().rotate(vec3f(0, angley, 0));
 	}
 
-	if (Input.KeyDown(VK_ADD))//+
+	if (Input.KeyDown(VK_UP))
 	{
-		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
-		if (pt)
-		{
-			system("cls");
-			pt->SetC1(gC1 += 0.1f);
-			printf("c1:%f   \n", gC1);
-		}
+		anglex -= dt * 10;
+		g_Cam.transform().SetRotation(vec3f(0, 0, 0));
+		g_Cam.transform().rotate(vec3f(anglex, 0, 0));
+		g_Cam.transform().rotate(vec3f(0, angley, 0));
 	}
-	else if (Input.KeyDown(VK_SUBTRACT))//-
+	else if (Input.KeyDown(VK_DOWN))
 	{
-		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
-		if (pt)
-		{
-			system("cls");
-			pt->SetC1(gC1 -= 0.1f);
-			printf("c1:%f   \n", gC1);
-		}
+		anglex += dt * 10;
+		g_Cam.transform().SetRotation(vec3f(0, 0, 0));
+		g_Cam.transform().rotate(vec3f(anglex, 0, 0));
+		g_Cam.transform().rotate(vec3f(0, angley, 0));
 	}
 
-	if (Input.KeyDown(VK_DIVIDE))// /
-	{
-		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
-		if (pt)
-		{
-			system("cls");
-			pt->SetC2(gC2 += 0.1f);
-			printf("c2:%f   \n", gC2);
-		}
-	}
-	else if (Input.KeyDown(VK_MULTIPLY))// *
-	{
-		Terrain* pt = (Terrain*)g_Terrain.GetComponent(COMTYPE::ComType_Terrain);
-		if (pt)
-		{
-			system("cls");
-			pt->SetC2(gC2 -= 0.1f);
-			printf("c2:%f   \n", gC2);
-		}
-	}
-
-	g_Terrain.OnUpdate();
+	g_SkyBox.OnUpdate();
 	g_Cam.OnUpdate();
+	g_Box.OnUpdate();
+	//g_RabbitVoxel.OnUpdate();
 }
 
 void Scene::Render(float dt)
 {
-	g_Terrain.OnRender();
-
+	g_Box.OnRender();
+	g_SkyBox.OnRender();
+	//g_RabbitVoxel.OnRender();
 }
 
 Scene::~Scene()

@@ -3,6 +3,8 @@
 
 Triangle RenderList::mRenderTriangle[MAX_TRANGLE_NUM];
 Triangle TerrainRenderList::mTerrainRenderTriangle[MAX_TRANGLE_NUM];
+Triangle SkyBoxRenderList::mSkyBoxRenderTriangle[24];
+
 
 RenderList::RenderList()
 {
@@ -451,6 +453,218 @@ void TerrainRenderList::RenderAllTriangle()
 }
 
 void TerrainRenderList::ClearTriangle()
+{
+	mCurIndex = 0;
+}
+
+
+SkyBoxRenderList::SkyBoxRenderList()
+{
+	mCurIndex = 0;
+}
+
+void SkyBoxRenderList::AddTriangle()
+{
+	if (mCurIndex + 1 < 24)
+	{
+		++mCurIndex;
+	}
+}
+
+Triangle& SkyBoxRenderList::GetNextTriangle()
+{
+	return mSkyBoxRenderTriangle[mCurIndex];
+}
+
+int SkyBoxRenderList::GetTriangleCount()
+{
+	return mCurIndex;
+}
+
+void SkyBoxRenderList::RenderAllTriangle()
+{
+	//先将三角形算到摄像机坐标系下
+	//因为该空间下的近截面十分特殊 （ z = near_z）
+	const Mat4x4f& matView = Camera::mainCamera->MatrixView;
+	const Mat4x4f& matPV = Camera::mainCamera->MatrixProjection * Camera::mainCamera->MatrixViewPort;
+	float& zNear = Camera::mainCamera->mZnear;
+	float z1, z2, z3;
+	Plane3D planeNear(vec3f(0, 0, zNear), vec3f::forward());
+	//为了避免计算增加的三角形，将三角形的数量先记录一下
+	int OldIndex = mCurIndex;//还没有裁剪的时候的三角形数量
+
+	int insideCount = 0;//点在内部的点的个数
+	vec3f c1, c2;//假设为这两个交点
+	vec2f newuv1, newuv2;//
+	float t1, t2;
+
+	//遍历判断
+	for (int i = 0; i < OldIndex; ++i)
+	{
+		//先将三角形算到摄像机坐标系下
+		mSkyBoxRenderTriangle[i].Transform(matView);
+
+		//分情况讨论
+		//判断有几个点在内部(只需要比较z值与近截面的zNear值的大小关系就可以得到内外分布情况)
+		//如果 z < zNear 在外面
+		//如果 z > zNear 在里面
+		insideCount = (mSkyBoxRenderTriangle[i].p1.z > zNear ? 1 : 0) +
+			(mSkyBoxRenderTriangle[i].p2.z > zNear ? 1 : 0) +
+			(mSkyBoxRenderTriangle[i].p3.z > zNear ? 1 : 0);
+
+		switch (insideCount)
+		{
+		case 0: {continue; }break;//都在外面不绘制
+		case 3: {}break;//都在里面，后面直接绘制
+		case 1://表示有一个点在里面
+		{
+			Triangle& t = mSkyBoxRenderTriangle[i];
+			if (t.pts[0].z > zNear)
+			{
+				planeNear.LineCrossPlane(t.pts[0], t.pts[1], c1, &t1);
+				planeNear.LineCrossPlane(t.pts[0], t.pts[2], c2, &t2);
+				t.pts[1] = c1;
+				t.pts[2] = c2;
+				t.uv[1] = vec2f::Lerp(t.uv[0], t.uv[1], t1);
+				t.uv[2] = vec2f::Lerp(t.uv[0], t.uv[2], t2);
+			}
+			else if (t.pts[1].z > zNear)
+			{
+				planeNear.LineCrossPlane(t.pts[1], t.pts[2], c1, &t1);
+				planeNear.LineCrossPlane(t.pts[1], t.pts[0], c2, &t2);
+				t.pts[2] = c1;
+				t.pts[0] = c2;
+				t.uv[2] = vec2f::Lerp(t.uv[1], t.uv[2], t1);
+				t.uv[0] = vec2f::Lerp(t.uv[1], t.uv[0], t2);
+			}
+			else
+			{
+				planeNear.LineCrossPlane(t.pts[2], t.pts[0], c1, &t1);
+				planeNear.LineCrossPlane(t.pts[2], t.pts[1], c2, &t2);
+				t.pts[0] = c1;
+				t.pts[1] = c2;
+				t.uv[0] = vec2f::Lerp(t.uv[2], t.uv[0], t1);
+				t.uv[1] = vec2f::Lerp(t.uv[2], t.uv[1], t2);
+			}
+		}break;
+		case 2:
+		{
+			Triangle& t = mSkyBoxRenderTriangle[i];
+			if (t.pts[0].z < zNear)
+			{
+				planeNear.LineCrossPlane(t.pts[0], t.pts[2], c1, &t1);
+				planeNear.LineCrossPlane(t.pts[0], t.pts[1], c2, &t2);
+				newuv1 = vec2f::Lerp(t.uv[0], t.uv[2], t1);
+				newuv2 = vec2f::Lerp(t.uv[0], t.uv[1], t2);
+				t.pts[0] = c1;
+				t.uv[0] = newuv1;
+
+				//使用新增的两个交点和原来一个点构成新的三角形
+				Triangle& tNew = GetNextTriangle();
+				tNew.p1 = t.pts[1];
+				tNew.p2 = c1;
+				tNew.p3 = c2;
+
+				tNew.uv1 = t.uv[1];
+				tNew.uv2 = newuv1;
+				tNew.uv3 = newuv2;
+				tNew.ptexture = t.ptexture;
+
+				AddTriangle();
+			}
+			else if (t.pts[1].z < zNear)
+			{
+				planeNear.LineCrossPlane(t.pts[1], t.pts[0], c1, &t1);
+				planeNear.LineCrossPlane(t.pts[1], t.pts[2], c2, &t2);
+				newuv1 = vec2f::Lerp(t.uv[1], t.uv[0], t1);
+				newuv2 = vec2f::Lerp(t.uv[1], t.uv[2], t2);
+				t.pts[1] = c1;
+				t.uv[1] = newuv1;
+
+				//使用新增的两个交点和原来一个点构成新的三角形
+				Triangle& tNew = GetNextTriangle();
+				tNew.p1 = t.pts[2];
+				tNew.p2 = c1;
+				tNew.p3 = c2;
+
+				tNew.uv1 = t.uv[2];
+				tNew.uv2 = newuv1;
+				tNew.uv3 = newuv2;
+				tNew.ptexture = t.ptexture;
+				AddTriangle();
+			}
+			else if (t.pts[2].z < zNear)
+			{
+				planeNear.LineCrossPlane(t.pts[2], t.pts[1], c1, &t1);
+				planeNear.LineCrossPlane(t.pts[2], t.pts[0], c2, &t2);
+				newuv1 = vec2f::Lerp(t.uv[2], t.uv[1], t1);
+				newuv2 = vec2f::Lerp(t.uv[2], t.uv[0], t2);
+				t.pts[2] = c1;
+				t.uv[2] = newuv1;
+				//使用新增的两个交点和原来一个点构成新的三角形
+				Triangle& tNew = GetNextTriangle();
+				tNew.p1 = t.pts[0];
+				tNew.p2 = c1;
+				tNew.p3 = c2;
+
+				tNew.uv1 = t.uv[0];
+				tNew.uv2 = newuv1;
+				tNew.uv3 = newuv2;
+				tNew.ptexture = t.ptexture;
+				AddTriangle();
+			}
+			else
+			{
+
+			}
+		}break;
+		}
+		z1 = mSkyBoxRenderTriangle[i].p1.z;
+		z2 = mSkyBoxRenderTriangle[i].p2.z;
+		z3 = mSkyBoxRenderTriangle[i].p3.z;
+
+		//能在这里绘制的三角形，要么是不需要裁剪的，或者是已经裁剪过的三角形
+		mSkyBoxRenderTriangle[i].Transform(matPV);//投影和视口变换
+
+		mSkyBoxRenderTriangle[i].p1.z = 1 / z1;
+		mSkyBoxRenderTriangle[i].p2.z = 1 / z2;
+		mSkyBoxRenderTriangle[i].p3.z = 1 / z3;
+
+		mSkyBoxRenderTriangle[i].uv1 /= z1;
+		mSkyBoxRenderTriangle[i].uv2 /= z2;
+		mSkyBoxRenderTriangle[i].uv3 /= z3;
+
+
+		MRB.DrawTriangle_Sky(
+			mSkyBoxRenderTriangle[i].p1.x, mSkyBoxRenderTriangle[i].p1.y, mSkyBoxRenderTriangle[i].p1.z,
+			mSkyBoxRenderTriangle[i].p2.x, mSkyBoxRenderTriangle[i].p2.y, mSkyBoxRenderTriangle[i].p2.z,
+			mSkyBoxRenderTriangle[i].p3.x, mSkyBoxRenderTriangle[i].p3.y, mSkyBoxRenderTriangle[i].p3.z,
+			mSkyBoxRenderTriangle[i].uv1, mSkyBoxRenderTriangle[i].uv2, mSkyBoxRenderTriangle[i].uv3,
+			mSkyBoxRenderTriangle[i].ptexture);
+	}
+	//绘制可能新增的三角形
+	for (int i = OldIndex; i < mCurIndex; ++i)
+	{
+		z1 = mSkyBoxRenderTriangle[i].p1.z;
+		z2 = mSkyBoxRenderTriangle[i].p2.z;
+		z3 = mSkyBoxRenderTriangle[i].p3.z;
+
+		mSkyBoxRenderTriangle[i].Transform(matPV);//投影和视口变换
+
+		mSkyBoxRenderTriangle[i].p1.z = 1 / z1;
+		mSkyBoxRenderTriangle[i].p2.z = 1 / z2;
+		mSkyBoxRenderTriangle[i].p3.z = 1 / z3;
+
+		MRB.DrawTriangle_Sky(
+			mSkyBoxRenderTriangle[i].p1.x, mSkyBoxRenderTriangle[i].p1.y, mSkyBoxRenderTriangle[i].p1.z,
+			mSkyBoxRenderTriangle[i].p2.x, mSkyBoxRenderTriangle[i].p2.y, mSkyBoxRenderTriangle[i].p2.z,
+			mSkyBoxRenderTriangle[i].p3.x, mSkyBoxRenderTriangle[i].p3.y, mSkyBoxRenderTriangle[i].p3.z,
+			mSkyBoxRenderTriangle[i].uv1, mSkyBoxRenderTriangle[i].uv2, mSkyBoxRenderTriangle[i].uv3,
+			mSkyBoxRenderTriangle[i].ptexture);
+	}
+}
+
+void SkyBoxRenderList::ClearTriangle()
 {
 	mCurIndex = 0;
 }

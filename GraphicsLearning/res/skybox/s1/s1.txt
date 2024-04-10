@@ -1,0 +1,7 @@
+[skyinfo]
+front = skybox_front.bmp
+back = skybox_back.bmp
+left = skybox_left.bmp
+right = skybox_right.bmp
+top = skybox_top.bmp
+bottom = skybox_bottom.bmp

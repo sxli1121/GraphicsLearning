@@ -1077,6 +1077,122 @@ void MemRenderBuffer::DrawTriangle_Solid(
 
 
 }
+void MemRenderBuffer::DrawTriangle_Sky(
+	int x1, int y1, float z1,
+	int x2, int y2, float z2,
+	int x3, int y3, float z3,
+	vec2f uv1, vec2f uv2, vec2f uv3, MyTexture2D* ptex)
+{
+	//处理一些特殊的情况
+	if (y1 == y2 && y2 == y3)//水平的直线
+	{
+		int minx = min(min(x1, x2), x3);
+		int maxx = max(max(x1, x2), x3);
+		//DrawLine_Bresenham(minx, y1, maxx, y1, color);
+		//COLOR32 c1 = minx == x1 ? color1 : minx == x2 ? color2 : color3;
+		//COLOR32 c2 = maxx == x1 ? color1 : maxx == x2 ? color2 : color3;
+
+		vec2f _uv1 = minx == x1 ? uv1 : minx == x2 ? uv2 : uv3;
+		vec2f _uv2 = maxx == x1 ? uv1 : maxx == x2 ? uv2 : uv3;
+		COLOR32 c1 = ptex->GetUVColor(_uv1);
+		COLOR32 c2 = ptex->GetUVColor(_uv2);
+		DrawLine_Bresenham(minx, y1, maxx, y1, c1, c2);
+		return;
+	}
+	else if (x1 == x2 && x2 == x3)//竖直的直线
+	{
+		int miny = min(min(y1, y2), y3);
+		int maxy = max(max(y1, y2), y3);
+		//DrawLine_Bresenham(x1, miny, x1, maxy, color);
+		//COLOR32 c1 = miny == y1 ? color1 : miny == y2 ? color2 : color3;
+		//COLOR32 c2 = maxy == y1 ? color1 : maxy == y2 ? color2 : color3;
+		vec2f _uv1 = miny == y1 ? uv1 : miny == y2 ? uv2 : uv3;
+		vec2f _uv2 = maxy == y1 ? uv1 : maxy == y2 ? uv2 : uv3;
+		COLOR32 c1 = ptex->GetUVColor(_uv1);
+		COLOR32 c2 = ptex->GetUVColor(_uv2);
+		DrawLine_Bresenham(x1, miny, x1, maxy, c1, c2);
+		return;
+	}
+
+	//在绘制三角形之前先判断三角形的类型
+	//类型：一般三角形，平顶三角形，平底三角形
+	//平顶三角形和平底三角形可以直接绘制，一般三角形需要拆分为两种三角形
+	//为了保证判断的时候统一规律，将传入的参数进行一个排序调整
+	//保证:y1 <= y2 <= y3
+	if (y2 > y3)
+	{
+		int x = x2; x2 = x3; x3 = x;
+		int y = y2; y2 = y3; y3 = y;
+		float z = z2; z2 = z3; z3 = z;
+		//COLOR32 c = color2; color2 = color3; color3 = c;
+		vec2f uv = uv2; uv2 = uv3; uv3 = uv;
+	}
+	if (y1 > y2)
+	{
+		int x = x2; x2 = x1; x1 = x;
+		int y = y2; y2 = y1; y1 = y;
+		float z = z2; z2 = z1; z1 = z;
+		//COLOR32 c = color2; color2 = color1; color1 = c;
+		vec2f uv = uv2; uv2 = uv1; uv1 = uv;
+	}
+	if (y2 > y3)
+	{
+		int x = x2; x2 = x3; x3 = x;
+		int y = y2; y2 = y3; y3 = y;
+		float z = z2; z2 = z3; z3 = z;
+		//COLOR32 c = color2; color2 = color3; color3 = c;
+		vec2f uv = uv2; uv2 = uv3; uv3 = uv;
+	}
+
+
+	//判断三角形类型
+	if (y2 == y3)//一定是平底三角形
+	{
+		if (x2 < x3)
+		{
+			_DrawTriangle_Sky_Bottom(x1, y1, z1, x2, y2, z2, x3, y3, z3, uv1, uv2, uv3, ptex);
+		}
+		else
+		{
+			_DrawTriangle_Sky_Bottom(x1, y1, z1, x3, y3, z3, x2, y2, z2, uv1, uv3, uv2, ptex);
+		}
+	}
+	else if (y1 == y2)//一定是平顶三角形
+	{
+		if (x1 < x2)
+		{
+			_DrawTriangle_Sky_Top(x1, y1, z1, x2, y2, z2, x3, y3, z3, uv1, uv2, uv3, ptex);
+		}
+		else
+		{
+			_DrawTriangle_Sky_Top(x2, y2, z2, x1, y1, z1, x3, y3, z3, uv2, uv1, uv3, ptex);
+		}
+	}
+	else//一般的三角形
+	{
+		//vec3f c1 = color1;
+		//vec3f c3 = color3;
+		//计算拆分点的x的坐标
+		float k = (y2 - y1) / float(y3 - y1);
+		int nx = x1 + (x3 - x1) * k;
+		float nz = z1 + (z3 - z1) * k;
+		vec2f nuv = vec2f::Lerp(uv1, uv3, k);
+		//插值拆分点的颜色
+		//COLOR32 nc = vec3f::Lerp(c1, c3, k);
+		int ny = y2;
+		if (nx < x2)
+		{
+			_DrawTriangle_Sky_Bottom(x1, y1, z1, nx, ny, nz, x2, y2, z2, uv1, nuv, uv2, ptex);
+			_DrawTriangle_Sky_Top(nx, ny, nz, x2, y2, z2, x3, y3, z3, nuv, uv2, uv3, ptex);
+		}
+		else
+		{
+			_DrawTriangle_Sky_Bottom(x1, y1, z1, x2, y2, z2, nx, ny, nz, uv1, uv2, nuv, ptex);
+			_DrawTriangle_Sky_Top(x2, y2, z2, nx, ny, nz, x3, y3, z3, uv2, nuv, uv3, ptex);
+		}
+	}
+}
+
 void MemRenderBuffer::DrawColorPlate(int cx, int cy, int r)
 {
 	//红色在0°，绿色在120°，蓝色在240°，圆心为白色
@@ -1703,6 +1819,344 @@ void MemRenderBuffer::_DrawTriangle_Solid_Top_W(int x1, int y1, int x2, int y2, 
 				_TriangleWeight(x1, y1, x2, y2, x3, y3, x, y, w1, w2, w3);
 				c = c1 * w1 + c2 * w2 + c3 * w3;
 				memcpy(&mBufferArray[y][x], &c, sizeof(COLOR32));
+			}
+		}
+	}
+}
+
+void MemRenderBuffer::_DrawTriangle_Sky_Top(
+	int x1, int y1, float z1,
+	int x2, int y2, float z2,
+	int x3, int y3, float z3,
+	vec2f uv1, vec2f uv2, vec2f uv3, MyTexture2D* ptex)
+{
+	//vec3f c1 = color1, c2 = color2, c3 = color3;
+		//需要传入的是x1一定小于x2的
+	float height = y3 - y1;//得到的是高度，换句话说就是像素的行数
+	float dx_left = (x3 - x1) / height;//得到的是左边沿着y方向单位像素x的变化量
+	float dx_right = (x3 - x2) / height;//得到的是右边沿着y方向单位像素x的变化量
+	//vec3f dc_left = (c3 - c1) / height;//得到的是左边沿着y方向单位像素颜色的变化量
+	//vec3f dc_right = (c3 - c2) / height;//得到的是右边沿着y方向单位像素颜色的变化量
+	float dz_left = (z3 - z1) / height;
+	float dz_right = (z3 - z2) / height;
+	vec2f duv_left = (uv3 - uv1) / height;
+	vec2f duv_right = (uv3 - uv2) / height;
+
+	//定义每一行像素绘制的起点和终点
+	float sx = x1;
+	float ex = x2 + 0.5f;
+	//每一行像素颜色的起点和终点
+	//vec3f sc = c1;
+	//vec3f ec = c2;
+	vec2f suv = uv1;
+	vec2f euv = uv2;
+
+	float sz = z1;
+	float ez = z2;
+	//每一行从sc到ec的单位像素对应的变化量
+	//vec3f dch = (ec - sc)/(ex - sx);
+	//vec3f dch;
+	//vec3f cc;//当前的颜色
+	vec2f duv_h;
+	vec2f cuv;
+	COLOR32 color;
+	float dzh;
+	float cz;
+
+	//判断三角形是否在视口范围内
+	//如果在范围内，直接绘制，如果不在范围内，判断裁剪情况或者不绘制
+	if (mRect.PtInRect(x1, y1) && mRect.PtInRect(x2, y2) && mRect.PtInRect(x3, y3))
+	{
+		//都在视口范围内，直接绘制
+		for (int y = y1; y <= y3; ++y)
+		{
+			//dch = (ec - sc) / (ex - sx);
+			duv_h = (euv - suv) / (ex - sx);
+			dzh = (ez - sz) / (ex - sx);
+			//cc = sc;
+			cuv = suv;
+			cz = sz;
+			for (int x = sx; x < ex; ++x)
+			{
+				//天空盒不写入深度
+				//if (cz > mZBuffer[y * mCol + x])
+				//{
+					//color = cc;
+				color = ptex->GetUVColor(cuv / cz);
+				memcpy(&mBufferArray[y][x], &color, sizeof(COLOR32));
+				//mZBuffer[y * mCol + x] = cz;//更新为新的z值
+			//}
+			//cc += dch;
+				cuv += duv_h;
+				cz += dzh;
+			}
+			//每绘制一行,更新新一行的起始和结束位置
+			sx += dx_left;
+			ex += dx_right;
+			//sc += dc_left;
+			//ec += dc_right;
+			suv += duv_left;
+			euv += duv_right;
+			sz += dz_left;
+			ez += dz_right;
+		}
+	}
+	else
+	{
+		//将超过边界的地方进行裁剪
+		//处理上下边界裁剪情况
+		if (y1 < 0)//上边界越界
+		{
+			sx += dx_left * (0 - y1);
+			ex += dx_right * (0 - y2);
+			//sc += dc_left * (0 - y1);
+			//ec += dc_right * (0 - y2);
+			suv += duv_left * (0 - y1);
+			euv += duv_right * (0 - y2);
+			sz += dz_left * (0 - y1);
+			ez += dz_right * (0 - y2);
+			y1 = y2 = 0;
+		}
+		//下边界越界
+		if (y3 > mRow - 1)
+		{
+			y3 = mRow - 1;
+		}
+
+		for (int y = y1; y <= y3; ++y)
+		{
+			//左右越界的情况处理，按照每一行进行裁剪
+			//为了讨论x方向的裁剪
+			//将绘制的一行的像素的起点和终点划分为
+			//1.理论上的起终点 sx,ex （始终按照三角形的x变化量,进行变化）
+			//2.实际的起终点 left,right;
+
+			int left = sx;
+			int right = ex;
+			//vec3f lc = sc;
+			//vec3f rc = ec;
+			vec2f luv = suv;
+			vec2f ruv = euv;
+			float zleft = sz;
+			float len = ex - sx;
+			//dch = (ec - sc) / len;
+			duv_h = (euv - suv) / len;
+			dzh = (ez - sz) / len;
+			int oldx = sx;
+			//可以提前计算下一行的理论起终点
+			sx += dx_left;
+			ex += dx_right;
+			//sc += dc_left;
+			//ec += dc_right;
+			suv += duv_left;
+			euv += duv_right;
+			sz += dz_left;
+			ez += dz_right;
+
+
+			if (left < 0)
+			{
+				left = 0;
+				//lc += dch * (0 - oldx);
+				luv += duv_h * (0 - oldx);
+				zleft += dzh * (0 - oldx);
+				if (right < 0)
+				{
+					continue;//说明这一行不需要绘制了
+				}
+			}
+			if (left > mCol - 1)
+			{
+				continue;
+			}
+			if (right > mCol - 1)
+			{
+				right = mCol - 1;
+			}
+			//cc = lc;
+			cuv = luv;
+			cz = zleft;
+			//绘制本行的直线
+			for (int x = left; x <= right; ++x)
+			{
+				//天空盒不写入深度
+				//if (cz > mZBuffer[y * mCol + x])
+				//{
+					//color = cc;
+				color = ptex->GetUVColor(cuv / cz);
+				memcpy(&mBufferArray[y][x], &color, sizeof(COLOR32));
+				//mZBuffer[y * mCol + x] = cz;
+			//}
+			//cc += dch;
+				cuv += duv_h;
+				cz += dzh;
+			}
+		}
+	}
+}
+
+void MemRenderBuffer::_DrawTriangle_Sky_Bottom(
+	int x1, int y1, float z1,
+	int x2, int y2, float z2,
+	int x3, int y3, float z3,
+	vec2f uv1, vec2f uv2, vec2f uv3, MyTexture2D* ptex)
+{
+	//vec3f c1 = color1, c2 = color2, c3 = color3;
+		//需要传入的是x2一定小于x3的
+	float height = y2 - y1;//得到的是高度，换句话说就是像素的行数
+	float dx_left = (x2 - x1) / height;//得到的是左边沿着y方向单位像素x的变化量
+	float dx_right = (x3 - x1) / height;//得到的是右边沿着y方向单位像素x的变化量
+	//vec3f dc_left = (c2 - c1) / height;
+	//vec3f dc_right = (c3 - c1) / height;
+	vec2f duv_left = (uv2 - uv1) / height;
+	vec2f duv_right = (uv3 - uv1) / height;
+
+	float dz_left = (z2 - z1) / height;
+	float dz_right = (z3 - z1) / height;
+	//定义每一行像素绘制的起点和终点
+	float sx = x1;
+	float ex = x1 + 0.5f;
+	//vec3f sc = c1;
+	//vec3f ec = c1;
+	vec2f suv = uv1;
+	vec2f euv = uv1;
+	float sz = z1;
+	float ez = z1;
+	vec3f dch;
+	float dzh;
+	float cz;
+	vec2f duvh;
+	//vec3f cc;
+	vec2f cuv;
+	COLOR32 color;
+
+	//判断三角形是否在视口范围内
+	//如果在范围内，直接绘制，如果不在范围内，判断裁剪情况或者不绘制
+	if (mRect.PtInRect(x1, y1) && mRect.PtInRect(x2, y2) && mRect.PtInRect(x3, y3))
+	{
+		//都在视口范围内，直接绘制
+		for (int y = y1; y <= y2; ++y)
+		{
+			//dch = (ec - sc) / (ex - sx);
+			duvh = (euv - suv) / (ex - sx);
+			dzh = (ez - sz) / (ex - sx);
+			//cc = sc;
+			cuv = suv;
+			cz = sz;
+
+			for (int x = sx; x < ex; ++x)
+			{
+				//天空盒不写入深度
+				//if (cz > mZBuffer[y * mCol + x])
+				//{
+					//color = cc;
+				color = ptex->GetUVColor(cuv / cz);
+				memcpy(&mBufferArray[y][x], &color, sizeof(COLOR32));
+				//	mZBuffer[y * mCol + x] = cz;
+				//}
+				//cc += dch;
+				cuv += duvh;
+				cz += dzh;
+			}
+			//每绘制一行,更新新一行的起始和结束位置
+			sx += dx_left;
+			ex += dx_right;
+			//sc += dc_left;
+			//ec += dc_right;
+			suv += duv_left;
+			euv += duv_right;
+			sz += dz_left;
+			ez += dz_right;
+		}
+	}
+	else
+	{
+		//将超过边界的地方进行裁剪
+		//处理上下边界裁剪情况
+		if (y1 < 0)//上边界越界
+		{
+			sx += dx_left * (0 - y1);
+			ex += dx_right * (0 - y1);
+			//sc += dc_left * (0 - y1);
+			//ec += dc_right * (0 - y1);
+			suv += duv_left * (0 - y1);
+			euv += duv_right * (0 - y1);
+			sz += dz_left * (0 - y1);
+			ez += dz_right * (0 - y1);
+			y1 = 0;
+		}
+		//下边界越界
+		if (y2 > mRow - 1)
+		{
+			y2 = y3 = mRow - 1;
+		}
+
+		for (int y = y1; y <= y2; ++y)
+		{
+			//左右越界的情况处理，按照每一行进行裁剪
+			//为了讨论x方向的裁剪
+			//将绘制的一行的像素的起点和终点划分为
+			//1.理论上的起终点 sx,ex （始终按照三角形的x变化量,进行变化）
+			//2.实际的起终点 left,right;
+
+			int left = sx;
+			int right = ex;
+			float zleft = sz;
+			//vec3f lc = sc;
+			//vec3f rc = ec;
+			vec2f luv = suv;
+			vec2f ruv = euv;
+			float len = ex - sx;
+			//dch = (ec - sc) / len;
+			duvh = (euv - suv) / len;
+			dzh = (ez - sz) / len;
+			int oldx = sx;
+			//可以提前计算下一行的理论起终点
+			sx += dx_left;
+			ex += dx_right;
+			//sc += dc_left;
+			//ec += dc_right;
+			suv += duv_left;
+			euv += duv_right;
+			sz += dz_left;
+			ez += dz_right;
+
+			if (left < 0)
+			{
+				left = 0;
+				zleft += dzh * (0 - oldx);
+				//lc += dch * (0 - oldx);
+				luv += duvh * (0 - oldx);
+				if (right < 0)
+				{
+					continue;//说明这一行不需要绘制了
+				}
+			}
+			if (left > mCol - 1)
+			{
+				continue;
+			}
+			if (right > mCol - 1)
+			{
+				right = mCol - 1;
+			}
+			//cc = lc;
+			cuv = luv;
+			cz = zleft;
+			//绘制本行的直线
+			for (int x = left; x <= right; ++x)
+			{
+				//天空盒不写入深度
+				//if (cz > mZBuffer[y * mCol + x])
+				//{
+					//color = cc;
+				color = ptex->GetUVColor(cuv / cz);
+				memcpy(&mBufferArray[y][x], &color, sizeof(COLOR32));
+				//	mZBuffer[y * mCol + x] = cz;
+				//}
+				//cc += dch;
+				cuv += duvh;
+				cz += dzh;
 			}
 		}
 	}

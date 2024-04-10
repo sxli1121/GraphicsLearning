@@ -101,8 +101,12 @@ public:
 		vec2f uv1, vec2f uv2, vec2f uv3,
 		class MyTexture2D* ptex);
 
-
-
+	// 天空盒
+	void DrawTriangle_Sky(
+		int x1, int y1, float z1,
+		int x2, int y2, float z2,
+		int x3, int y3, float z3,
+		vec2f uv1, vec2f uv2, vec2f uv3, class MyTexture2D* ptex);
 
 	//色盘的绘制
 	void DrawColorPlate(int cx, int cy, int r);
@@ -126,6 +130,18 @@ protected:
 	void _DrawTriangle_Solid_Top_W(int x1, int y1, int x2, int y2, int x3, int y3,
 		const COLOR32& color1, const COLOR32& color2, const COLOR32& color3);
 
+	// 天空盒
+	void _DrawTriangle_Sky_Top(
+		int x1, int y1, float z1,
+		int x2, int y2, float z2,
+		int x3, int y3, float z3,
+		vec2f uv1, vec2f uv2, vec2f uv3, MyTexture2D* ptex);
+
+	void _DrawTriangle_Sky_Bottom(
+		int x1, int y1, float z1,
+		int x2, int y2, float z2,
+		int x3, int y3, float z3,
+		vec2f uv1, vec2f uv2, vec2f uv3, MyTexture2D* ptex);
 
 	//绘制实心颜色渐变平顶平底三角形带深度值
 	void _DrawTriangle_Solid_Top(

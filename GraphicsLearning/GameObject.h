@@ -6,6 +6,7 @@
 #include "Transform.h"
 #include "MeshRender.h"
 #include "Terrain.h"
+#include "SkyBox.h"
 
 #include <vector>
 
@@ -81,6 +82,18 @@ public:
 			mComponents.push_back(pt);
 			return pt;
 		}break;
+		case emComponentType::ComType_SkyBox:
+		{
+			SkyBox* pSk = (SkyBox*)GetComponent(emComponentType::ComType_SkyBox);
+			if (pSk != nullptr)
+			{
+				return pSk;
+			}
+			pSk = new SkyBox(this);
+			mComponents.push_back(pSk);
+			return pSk;
+
+		}break;
 		case COMTYPE::ComType_Light:
 		{
 
@@ -138,10 +151,24 @@ public:
 		{
 			return pt->DrawTerrain();
 		}
+
+		SkyBox* pSk = (SkyBox*)GetComponent(emComponentType::ComType_SkyBox);
+		if (pSk != nullptr)
+		{
+			return pSk->DrawSkyBox();
+		}
 	}
+
+
 	//逻辑更新
 	void OnUpdate()
 	{
+		SkyBox* pSk = (SkyBox*)GetComponent(emComponentType::ComType_SkyBox);
+		if (pSk != nullptr)
+		{
+			return pSk->CalculateWorldVertexts();
+		}
+
 		Terrain* pt = (Terrain*)GetComponent(emComponentType::ComType_Terrain);
 		if (pt != nullptr)
 		{
@@ -170,6 +197,24 @@ public:
 			}
 		}
 	}
+	bool LoadSkyBox(const char* path)
+	{
+		if (!mComponents.empty())
+		{
+			for (auto& c : mComponents)
+			{
+				delete c;
+			}
+			mComponents.clear();
+		}
+		SkyBox* pSk = (SkyBox*)AddComponent(emComponentType::ComType_SkyBox);
+		if (pSk != nullptr)
+		{
+			return pSk->LoadSkyBox(path);
+		}
+		return false;
+	}
+
 
 	bool LoadMesh(const char* name)
 	{

@@ -171,6 +171,8 @@ bool Application::Run(const char* title,
 				TRL.ClearTriangle();
 				//每次绘制之前清掉三角形
 				RL.ClearTriangle();
+				//清空天空盒三角形
+				SRL.ClearTriangle();
 
 				////用指定颜色清除背景
 				MRB.FillColor(RGB(0, 0, 0));
@@ -179,6 +181,9 @@ bool Application::Run(const char* title,
 
 
 				MainScene.Render(deltatimef);
+
+				//清除颜色和深度以后优先绘制天空盒
+				SRL.RenderAllTriangle();
 
 				//绘制地形
 				TRL.RenderAllTriangle();

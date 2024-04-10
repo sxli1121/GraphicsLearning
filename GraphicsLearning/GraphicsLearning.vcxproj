@@ -137,6 +137,7 @@
     <ClCompile Include="MyTexture2D.cpp" />
     <ClCompile Include="RenderList.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="RenderList.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SingletonTemplate.h" />
+    <ClInclude Include="SkyBox.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="UtilityHelper.h" />

@@ -11,6 +11,7 @@ typedef enum class emComponentType
 	ComType_Camera,//摄像机组件
 	ComType_Light,//灯光组件
 	ComType_Terrain,//地形组件
+	ComType_SkyBox,
 	//...
 }COMTYPE,*LPCOMTYPE;
 
